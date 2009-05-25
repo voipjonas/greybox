@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+
+<project default="default">
+
+	<property name="dist.dir" value="dist" />
+	<property name="classes.dir" value="build/classes" />
+	<property name="testclasses.dir" value="build/testclasses" />
+	<property name="src.dir" value="src" />
+	<property name="lib.dir" value="lib" />
+
+	<taskdef resource="scala/tools/ant/antlib.xml">
+		<classpath>
+			<pathelement location="${lib.dir}/scala-compiler.jar"   />
+			<pathelement location="${lib.dir}/scala-library.jar"   />
+		</classpath>
+	</taskdef>
+
+	<target name="default" depends="clean,jar" />
+	
+	<target name="copydepends">
+		<copy file="${lib.dir}/scala-library.jar"
+		      todir="${dist.dir}"/>
+		<copy file="/usr/java/packages/lib/ext/jpcap.jar"
+		      todir="${dist.dir}"/>
+		<copy file="${lib.dir}/slf4j-api-1.5.6.jar"
+		      todir="${dist.dir}"/>
+		<copy file="${lib.dir}/slf4j-jdk14-1.5.6.jar"
+		      todir="${dist.dir}"/>
+
+		<path id="jardepends">
+			<fileset dir="${dist.dir}">
+				<include name="*.jar" />
+			</fileset>
+		</path>
+	</target>
+	
+	<target name="jar" depends="copydepends">
+		<scalac destdir="${classes.dir}" srcdir="${src.dir}">
+			<classpath refid="jardepends" />
+		</scalac>
+		
+		<pathconvert property="jar.manifest.depends" pathsep=" ">
+			<path refid="jardepends" />
+			<flattenmapper/>
+		</pathconvert>
+        
+		<jar basedir="${classes.dir}"
+		     destfile="${dist.dir}/greybox.jar">
+			<include name="**" />
+			<manifest>
+				<attribute name="Class-Path" value="${jar.manifest.depends}" />
+				<attribute name="Main-Class" value="greybox.recorder.Recorder" />
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="clean">
+		<delete dir="${classes.dir}" failonerror="false" />
+		<delete dir="${testclasses.dir}" failonerror="false" />
+		<delete dir="${dist.dir}" failonerror="false" />
+		<mkdir dir="${classes.dir}" />
+		<mkdir dir="${testclasses.dir}" />
+		<mkdir dir="${dist.dir}" />
+	</target>
+
+</project>
