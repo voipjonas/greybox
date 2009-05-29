@@ -1,6 +1,6 @@
 package greybox.flow
 
-import jpcap.packet.Packet
+import greybox.EndPoint
 
 class SipFlow( fromEndPoint_ : EndPoint,
                toEndPoint_   : EndPoint ) extends Flow {
@@ -8,8 +8,8 @@ class SipFlow( fromEndPoint_ : EndPoint,
   def fromEndPoint = fromEndPoint_
   def toEndPoint   = toEndPoint_
 
-  def acceptsPacket( packet : Packet ) = {
-    true
+  def receivePacket( packet : TransportLayerPacket ) = {
+    
   }
   
 }

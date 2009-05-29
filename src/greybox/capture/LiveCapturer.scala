@@ -13,6 +13,6 @@ class LiveCapturer( intf_name_ : String ) extends Capturer {
   }
   private val jpcapCaptor = JpcapCaptor.openDevice(device.get, 1500, true, 500)
   logger.info("Opened pcap handle for interface {}", intf_name_)
-  jpcapCaptor.loopPacket(-1, new PacketReceiver(this))
+  jpcapCaptor.loopPacket(-1, new PacketReceiver())
   
 }

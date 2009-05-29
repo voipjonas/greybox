@@ -4,9 +4,10 @@
 
 	<property name="dist.dir" value="dist" />
 	<property name="classes.dir" value="build/classes" />
-	<property name="testclasses.dir" value="build/testclasses" />
+	<property name="specclasses.dir" value="build/specclasses" />
 	<property name="src.dir" value="src" />
 	<property name="lib.dir" value="lib" />
+	<property name="spec.dir" value="specs" />
 
 	<taskdef resource="scala/tools/ant/antlib.xml">
 		<classpath>
@@ -15,7 +16,7 @@
 		</classpath>
 	</taskdef>
 
-	<target name="default" depends="clean,jar" />
+	<target name="default" depends="clean,jar,spec" />
 	
 	<target name="copydepends">
 		<copy file="${lib.dir}/scala-library.jar"
@@ -53,13 +54,43 @@
 			</manifest>
 		</jar>
 	</target>
+	
+	<target name="spec" depends="jar">
+		<path id="specdepends">
+			<fileset dir="${lib.dir}">
+				<include name="junit-4.6.jar" />
+				<include name="specs-1.5.0.jar" />
+			</fileset>
+		</path>
+		
+		<scalac destdir="${specclasses.dir}" srcdir="${spec.dir}">
+			<classpath refid="jardepends" />
+			<classpath refid="specdepends" />
+		</scalac>
+		
+		<junit printsummary="yes" haltonerror="true" haltonfailure="true">
+			<env key="DISPLAY" value=":0" />
+			<formatter type="plain" />
 
+			<batchtest fork="yes" todir="build">
+				<fileset dir="${specclasses.dir}">
+					<include name="**/*Test.class"/>
+					<exclude name="**/All*Test.class" />
+				</fileset>
+			</batchtest>
+
+			<classpath path="${specclasses.dir}" />
+			<classpath refid="jardepends" />
+			<classpath refid="specdepends" />
+		</junit>
+	</target>
+	
 	<target name="clean">
 		<delete dir="${classes.dir}" failonerror="false" />
-		<delete dir="${testclasses.dir}" failonerror="false" />
+		<delete dir="${specclasses.dir}" failonerror="false" />
 		<delete dir="${dist.dir}" failonerror="false" />
 		<mkdir dir="${classes.dir}" />
-		<mkdir dir="${testclasses.dir}" />
+		<mkdir dir="${specclasses.dir}" />
 		<mkdir dir="${dist.dir}" />
 	</target>
 
