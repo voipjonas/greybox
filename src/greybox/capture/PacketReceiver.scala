@@ -1,13 +1,23 @@
 package greybox.capture
 
 import org.slf4j.LoggerFactory
+import com.google.inject._
 
 import greybox._
 import greybox.flow._
 
-class PacketReceiver extends jpcap.PacketReceiver {
+trait PacketReceiver extends jpcap.PacketReceiver {
+  
+  def receivePacket( packet : TransportLayerPacket )
+  
+} 
+
+class PacketReceiverImpl extends PacketReceiver {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
+
+  @Inject
+  var flowManager : FlowManager = _  
 
   /** 
    * Match on the packet type and transform it into a more abstract representation,
@@ -27,9 +37,9 @@ class PacketReceiver extends jpcap.PacketReceiver {
   }  
   
   def receivePacket( packet : TransportLayerPacket ) {
-    FlowManager.findFlowBetween( packet.source, packet.dest ) match {
+    flowManager.findFlowBetween( packet.source, packet.dest ) match {
       case None => 
-        FlowManager.newFlowForPacket( packet )
+        flowManager.newFlowForPacket( packet )
       case Some(flow) =>
         flow.receivePacket( packet )
     }      

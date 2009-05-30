@@ -1,7 +1,23 @@
 package greybox.recorder
 
+import greybox.capture._
+import greybox.flow._
+
 import jpcap.JpcapCaptor
-import greybox.capture.LiveCapturer
+import com.google.inject._
+
+class RecorderGuiceModule extends AbstractModule {
+  override def configure {
+    bind(classOf[Capturer]).
+      to(classOf[LiveCapturer])
+    
+    bind(classOf[FlowManager]).
+      to(classOf[FlowManagerImpl])
+      
+    bind(classOf[PacketReceiver]).
+      to(classOf[PacketReceiverImpl])
+  }
+}
 
 object Recorder {
 
@@ -18,7 +34,9 @@ object Recorder {
       printf("\n")
     }
 */    
-    val capturer = new LiveCapturer("wlan0")
+    val injector = Guice.createInjector( new RecorderGuiceModule )
+    val capturer = injector.getInstance(classOf[Capturer]) 
+    capturer.capture("wlan0")
     
     ()
   }

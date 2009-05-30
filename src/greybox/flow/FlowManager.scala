@@ -1,8 +1,18 @@
 package greybox.flow
 
 import org.slf4j.LoggerFactory
+import com.google.inject._
 
-object FlowManager {
+trait FlowManager {
+
+  def newFlowForPacket( packet : TransportLayerPacket );
+  
+  def findFlowBetween( endpointA : EndPoint, endpointB : EndPoint ) : Option[Flow];
+
+}
+
+@Singleton
+class FlowManagerImpl extends FlowManager {
 
   private val logger = LoggerFactory.getLogger(this.getClass)
 

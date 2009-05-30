@@ -1,16 +1,31 @@
 package greybox.capture
 
-import org.specs._
 import greybox._
+import greybox.flow._
 
-object PacketReceiverSpec extends Specification {
+import com.google.inject._
+import org.specs._
+import org.specs.mock.Mockito
 
-  var packetReceiver : PacketReceiver = new PacketReceiver 
+object PacketReceiverSpec extends Specification with Mockito {
   
   "Receive new packet and start new flow" in {
-    packetReceiver.receivePacket( new TransportLayerPacket( EndPointMaker.newTcp(123),
-                                EndPointMaker.newTcp(456),
-                                "Hello".getBytes ) )
+    val mockFlowManager = mock[FlowManager]
+    val injector = Guice.createInjector( new AbstractModule {
+	    override def configure {	      
+	      bind(classOf[FlowManager]).
+	        toInstance(mockFlowManager)
+	      bind(classOf[PacketReceiver]).
+	        to(classOf[PacketReceiverImpl])
+	    }
+    } )
+    val packetReceiver = injector.getInstance(classOf[PacketReceiver])
+    val ep1 = EndPointMaker.newTcp(123)
+    val ep2 = EndPointMaker.newTcp(456)
+    val packet = new TransportLayerPacket( ep1, ep2, "Hello".getBytes )  
+    mockFlowManager.findFlowBetween(ep1, ep2) returns None
+    packetReceiver.receivePacket( packet ) 
+    mockFlowManager.newFlowForPacket(packet) was called
   }
 
 }
